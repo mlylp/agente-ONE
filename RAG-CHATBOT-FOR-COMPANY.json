@@ -1,0 +1,539 @@
+{
+  "name": "RAG chatbot for company documents using Google Drive and Gemini",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "company-files-v2",
+          "mode": "list",
+          "cachedResultName": "company-files-v2"
+        },
+        "options": {}
+      },
+      "id": "8156021c-63f7-42d1-a768-4d10b5235a38",
+      "name": "Pinecone Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "position": [
+        240,
+        240
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pineconeApi": {
+          "id": "EwKzwjZ9MmBamtwI",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "binaryMode": "specificField",
+        "binaryDataKey": "name",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "source_document",
+                "value": "={{ $('Download File From Google Drive').item.json.name }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "bc60d442-0d41-411b-918b-ed1c394244fc",
+      "name": "Default Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "position": [
+        400,
+        464
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "chunkOverlap": 100,
+        "options": {}
+      },
+      "id": "29c75d14-beaa-49e2-b0d3-cd21d92b52bd",
+      "name": "Recursive Character Text Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "position": [
+        384,
+        656
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Antes de responder qualquer pergunta, você deve OBRIGATORIAMENTE usar a ferramenta \"documentos_empresa\" para buscar informações relevantes nos documentos da empresa. Nunca responda com base apenas no seu conhecimento geral, mesmo que ache que sabe a resposta. Só diga que não encontrou a informação depois de ter consultado a ferramenta e ela não retornar nada relevante.\n\nVocê é o assistente interno de documentação da empresa. Responda perguntas de colaboradores com base exclusivamente no contexto recuperado dos documentos (políticas internas, FAQ, termos, guias, tabelas de preços).\n\nREGRAS:\n- Use apenas o conteúdo do contexto. Nunca invente informações, preços, prazos ou políticas.\n- Se não encontrar a resposta no contexto, diga isso claramente e sugira o time responsável (RH, Financeiro, Jurídico, TI conforme o assunto).\n- Se o contexto for parcial ou ambíguo, explique o que foi encontrado e o que não está coberto.\n- Se houver contradição entre trechos (ex: versões antigas x novas), sinalize ao usuário em vez de escolher uma versão.\n- Nunca mencione termos técnicos internos (embeddings, vetores, Pinecone, chunks). Cite o documento de origem quando útil (ex: \"de acordo com a Política de Reembolso...\").\n- Você não executa ações (cancelar pedido, aprovar reembolso, alterar cadastro), apenas informa o que consta na documentação e orienta o canal correto.\n\nTOM: português do Brasil, direto e profissional, acessível. Bullets para múltiplos itens. Seja conciso, sem introduções longas nem jargão técnico de IA."
+        }
+      },
+      "id": "6600037e-196d-415e-87d7-a5dd096d3439",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -16,
+        1072
+      ],
+      "typeVersion": 1.7
+    },
+    {
+      "parameters": {
+        "name": "documentos_empresa",
+        "description": "Retrieve information from any company documents",
+        "topK": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Limit', `Retrieve information from any company documents. Always call this tool with a single plain text string as input, never a JSON object.`, 'number') }}"
+      },
+      "id": "7214315c-ff5c-4c7a-a85a-7730e932922b",
+      "name": "Vector Store Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "position": [
+        144,
+        1296
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "company-files-v2",
+          "mode": "list",
+          "cachedResultName": "company-files-v2"
+        },
+        "options": {}
+      },
+      "id": "d9061c65-8a7a-4d15-a98f-6530685d4bbc",
+      "name": "Pinecone Vector Store (Retrieval)",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "position": [
+        288,
+        1472
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pineconeApi": {
+          "id": "EwKzwjZ9MmBamtwI",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {
+          "binaryPropertyName": "name",
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "application/pdf",
+              "drawingsToFormat": "application/pdf",
+              "slidesToFormat": "application/pdf",
+              "sheetsToFormat": "application/pdf"
+            }
+          }
+        }
+      },
+      "id": "d5214ac2-1279-4f17-ba1a-c5eb9585f56e",
+      "name": "Download File From Google Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        16,
+        240
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "OHmxxFXAibZO2Dyr",
+          "name": "Google Drive account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Chat with company documents"
+      },
+      "id": "091c25c0-d6e4-47da-a2ef-cec333b319c4",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -16,
+        896
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1F-8XAF7GwfAR-TTH96A5W1rfe8sE7fEe",
+          "mode": "list",
+          "cachedResultName": "agente-one",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1F-8XAF7GwfAR-TTH96A5W1rfe8sE7fEe"
+        },
+        "event": "fileUpdated",
+        "options": {
+          "fileType": "all"
+        }
+      },
+      "id": "341cc297-e9e8-454a-9761-fb891ce7954f",
+      "name": "Google Drive File Updated",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "position": [
+        -320,
+        320
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "OHmxxFXAibZO2Dyr",
+          "name": "Google Drive account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1F-8XAF7GwfAR-TTH96A5W1rfe8sE7fEe",
+          "mode": "list",
+          "cachedResultName": "agente-one",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1F-8XAF7GwfAR-TTH96A5W1rfe8sE7fEe"
+        },
+        "event": "fileCreated",
+        "options": {
+          "fileType": "all"
+        }
+      },
+      "id": "5e53c872-21a6-460d-a015-9d4ff72d486f",
+      "name": "Google Drive File Created",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "position": [
+        -304,
+        112
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "OHmxxFXAibZO2Dyr",
+          "name": "Google Drive account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 4
+      },
+      "id": "277f916f-a2f7-4700-8027-0b17c87f842f",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        64,
+        1376
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Olá! Sou Zyon, o assistente da Zyra Store. Com o que posso te ajudar hoje?👋\n",
+        "options": {
+          "subtitle": "Suporte interno",
+          "title": "Zyra Store"
+        }
+      },
+      "id": "f262f879-7432-4b0a-a1a5-76d130a4d602",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "position": [
+        -352,
+        1072
+      ],
+      "webhookId": "5f1c0c82-0ff9-40c7-9e2e-b1a96ffe24cd",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "content": "## Add docuemnts to vector store when updating or creating new documents in Google Drive",
+        "width": 320
+      },
+      "id": "e4be0c15-a3ce-41e1-a928-c1082e4d903b",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "modelName": "sentence-transformers/paraphrase-multilingual-mpnet-base-v2",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
+      "typeVersion": 1,
+      "position": [
+        144,
+        496
+      ],
+      "id": "830237de-6764-41a6-b6e0-017f3d12b4fe",
+      "name": "Embeddings HuggingFace Inference",
+      "credentials": {
+        "huggingFaceApi": {
+          "id": "8QbsBlFfcbI1hqqm",
+          "name": "Hugging Face account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {
+          "maxTokensToSample": 500,
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        1280
+      ],
+      "id": "7a38f41e-0c47-4425-9634-f49af4fb50f2",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "JCq1ZIznfXkp8py8",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "sentence-transformers/paraphrase-multilingual-mpnet-base-v2",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
+      "typeVersion": 1,
+      "position": [
+        384,
+        1680
+      ],
+      "id": "1b956194-f1ca-4383-ba25-32c131dbc9f8",
+      "name": "Embeddings HuggingFace Inference1",
+      "credentials": {
+        "huggingFaceApi": {
+          "id": "8QbsBlFfcbI1hqqm",
+          "name": "Hugging Face account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {
+          "maxTokensToSample": 300,
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        544,
+        1424
+      ],
+      "id": "b879f152-875e-4162-9f6a-621c21b2934f",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "JCq1ZIznfXkp8py8",
+          "name": "Groq account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Vector Store Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive File Created": {
+      "main": [
+        [
+          {
+            "node": "Download File From Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive File Updated": {
+      "main": [
+        [
+          {
+            "node": "Download File From Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download File From Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store (Retrieval)": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Vector Store Tool",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings HuggingFace Inference": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings HuggingFace Inference1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store (Retrieval)",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Vector Store Tool",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "04d7a9f4-e231-4e5c-9444-9f961572cc01",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c9ce612025aec776547fa41a4f77e99a3ac291d3a4be5e995aea0b3abd6a4a18"
+  },
+  "nodeGroups": [],
+  "id": "JTC0xEgXbqR5hAHV",
+  "tags": []
+}
