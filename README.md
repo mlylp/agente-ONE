@@ -126,3 +126,20 @@ GENERIC_TIMEZONE=America/Recife
 ## Licença
 
 Uso interno.
+
+## Exemplos de uso
+ 
+**Exemplos de perguntas que o agente consegue responder:**
+ 
+- Qual é a política de reembolso e devoluções da empresa?
+- Quais são os preços atuais da tabela de produtos?
+- Como funciona o processo de solicitação de férias?
+- Quais documentos são necessários para reembolso de despesas?
+- Qual o prazo de resposta do suporte técnico interno?
+**Exemplos de respostas geradas pelo agente:**
+ 
+> **Pergunta:** Qual é a política de reembolso e devoluções da empresa?
+> **Resposta:** De acordo com a Política de Reembolso e Devoluções, o cliente tem até 7 dias corridos após o recebimento para solicitar a devolução, desde que o produto esteja sem uso e na embalagem original. O reembolso é processado em até 10 dias úteis após a confirmação do recebimento do produto devolvido.
+ 
+> **Pergunta:** Vocês têm política de trabalho remoto às sextas-feiras?
+> **Resposta:** Não encontrei essa informação nos documentos disponíveis. Recomendo procurar o time de RH para confirmar essa política.
