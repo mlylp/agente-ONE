@@ -1,4 +1,4 @@
-# agente-ONE
+# Agente Interno de Suporte ao Funcionário da Loja Zyra Store
 # RAG Chatbot para Documentos da Empresa (Google Drive + Pinecone + Groq)
 
 Chatbot interno de documentação que responde perguntas de colaboradores com base exclusivamente nos documentos da empresa armazenados no Google Drive. Construído em [n8n](https://n8n.io), usando busca semântica (RAG) com Pinecone e modelos da Groq.
@@ -12,6 +12,10 @@ https://147-15-93-34.sslip.io/webhook/5f1c0c82-0ff9-40c7-9e2e-b1a96ffe24cd/chat
 ```
 
 ![Chat da aplicação](chat.png)
+
+## Demonstração em vídeo
+ 
+[![Assista à demonstração](https://img.youtube.com/vi/T0eXHyEOfvc/maxresdefault.jpg)](https://youtu.be/T0eXHyEOfvc)
 
 ## Como funciona
 
@@ -64,7 +68,7 @@ When chat message received
 | Hospedagem | Oracle Cloud Infrastructure (VM, Always Free ou trial) |
 | Proxy reverso / SSL | Caddy (certificado automático via Let's Encrypt) |
 
-## Pré-requisitos
+## Pré-requisitos para construção
 
 - Conta n8n self-hosted rodando (ver seção de deploy abaixo)
 - Conta Groq com API key
