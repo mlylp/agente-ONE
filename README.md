@@ -11,7 +11,7 @@ O chat pode ser acessado publicamente em:
 https://147-15-93-34.sslip.io/webhook/5f1c0c82-0ff9-40c7-9e2e-b1a96ffe24cd/chat
 ```
 
-![Chat da aplicação](chat.png)
+![Chat da aplicação](chat-resposta.png)
 
 ## Demonstração em vídeo
  
@@ -24,13 +24,18 @@ O fluxo é dividido em duas partes:
 **1. Indexação (ingestão de documentos)**
 Monitora uma pasta específica do Google Drive. Sempre que um arquivo é criado ou atualizado, o fluxo baixa o documento, converte formatos nativos do Google (Docs, Sheets, Slides) para PDF, quebra o conteúdo em chunks, gera embeddings e indexa no Pinecone.
 
+![Fluxo no n8n - parte 1](pt1-fluxo.png)
+
 **2. Consulta (chat)**
 Um agente de IA recebe a pergunta do usuário via interface de chat, decide se precisa consultar os documentos (usando uma ferramenta de busca vetorial conectada ao Pinecone) e responde com base apenas no que foi recuperado, nunca inventando informação.
 
+![Fluxo no n8n - parte 2](pt2-fluxo.png)
+
+
 ## Arquitetura
 
-![Fluxo no n8n - parte 1](pt1-fluxo.png)
-![Fluxo no n8n - parte 2](pt2-fluxo.png)
+![Arquitetura no n8n](cadeia-de-processamento.png)
+
 
 ```
 Google Drive (pasta monitorada)
